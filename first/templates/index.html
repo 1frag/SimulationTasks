@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Овощная ферма</title>
+    <script src="/first/static/script.js"></script>
+</head>
+<link rel="stylesheet" type="text/css" href="/first/static/style.css">
+<body>
+<div id="score" class="score">
+    100P
+</div>
+<div class="field">
+    <table border="1">
+        {% for i in range(4) %}
+        <tr>
+            {% for j in range(4) %}
+            <th id="{{'item{}{}'.format(i, j)}}"
+                onclick="DoIt(this, {{i}}, {{j}})"
+                class="item">
+                <div id="{{'inner{}{}'.format(i, j)}}"
+                     class="inner">
+                </div>
+            </th>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+
+<div class="conf">
+    {% for i in range(2, 6) %}
+    <div class="just-border">
+        <div class="rule {{'mark-{}'.format(i)}}"></div>
+        <div class="rule arrow">
+            <div class="conf-value"
+                 id="{{'conf-value{}'.format(i)}}"
+                 onclick="AskingConf(this)">
+            </div>
+        </div>
+        <div class="rule {{'mark-{}'.format(i+1)}}"></div>
+        <br/>
+    </div>
+    {% endfor %}
+    <label class="hidden-block">
+        <h3 id="about-change">for #x</h3>
+        <input type="number" min="1" max="1000" id="how-many">
+        <button onclick="SetNewConf()">Отправить</button>
+    </label>
+</div>
+
+<div class="timer" id="timer">
+<!--    02:36-->
+</div>
+
+<div class="rating">
+    <ol id="rating">
+<!--        <li>Vase [123P]</li>-->
+<!--        <li>Pety [85P]</li>-->
+<!--        <li>Igor [2P]</li>-->
+    </ol>
+</div>
+
+<div class="start" onclick="StartGame(this)">
+    START!
+</div>
+
+</body>
+</html>
