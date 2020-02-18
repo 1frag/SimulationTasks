@@ -41,7 +41,7 @@ html, body, .field, .score {
 }
 
 .arrow {
-    background-image: url('/static/arrow.png');
+    background-image: url('/first/staticstatic/arrow.png');
     background-size: 100% 100%;
     background-repeat: no-repeat;
     width: 200px !important;
