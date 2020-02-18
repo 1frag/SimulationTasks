@@ -42,16 +42,6 @@ class State(Enum):
         else:
             raise TypeError()
 
-    def get_next(self):
-        return {
-            'WHITE': self.BLACK,
-            'BLACK': self.GREEN,
-            'GREEN': self.YELLOW,
-            'YELLOW': self.RED,
-            'RED': self.BROWN,
-            'BROWN': self.BROWN,
-        }[self.name]
-
 
 class CustomEncoder(json.JSONEncoder):
     def default(self, obj):
