@@ -1,139 +1,38 @@
-:root {
-    --main-len: 120px;
-    --rool-len: 65px;
-    --display-form: none;
-    --state-1: wheat;
-    --state-2: black;
-    --state-3: green;
-    --state-4: yellow;
-    --state-5: red;
-    --state-6: brown;
+#graph {
+    border: black 2px solid;
+    height: content-box;
 }
 
-html, body, .field, .score {
-    margin: 0 auto;
-    display: block;
+.char {
+    width: 835px !important;
+    height: 525px !important;
 }
 
-.score {
+#conf {
     margin-bottom: 10px;
-    width: 120px;
-    font-size: 40px;
-    font-family: "DejaVu Sans Mono", serif;
-}
-
-.item {
-    width: var(--main-len);
-    height: var(--main-len);
-}
-
-.field {
-    width: calc(20px + 4 * var(--main-len));
-    margin-bottom: 30px;
-}
-
-.rule {
-    width: var(--rool-len);
-    height: var(--rool-len);
-    display: inline-block;
-    border: 1px black solid;
-    margin: 5px;
-}
-
-.arrow {
-    background-image: url('/first/staticstatic/arrow.png');
-    background-size: 100% 100%;
-    background-repeat: no-repeat;
-    width: 200px !important;
-    height: var(--rool-len) !important;
-    border: none !important;
-}
-
-.mark-1 {
-    background-color: var(--state-1);
-}
-
-.mark-2 {
-    background-color: var(--state-2);
-}
-
-.mark-3 {
-    background-color: var(--state-3);
-}
-
-.mark-4 {
-    background-color: var(--state-4);
-}
-
-.mark-5 {
-    background-color: var(--state-5);
-}
-
-.mark-6 {
-    background-color: var(--state-6);
-}
-
-.conf {
-    position: absolute;
-    top: 15px;
-    left: 40px;
-}
-
-.conf-value {
-    position: absolute;
-    color: blue;
-    margin-left: 117px;
-    margin-top: 18px;
-    font-size: 26px;
-}
-
-.just-border {
-    border: 1px black solid;
-}
-
-.hidden-block {
-    display: var(--display-form);
 }
 
 input {
-    width: 100px;
-    font-size: 24px;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
 }
 
-.inner {
-    font-size: 24px;
+.button {
+    background-color: #e7e7e7;
+    border: none;
     color: black;
-    position: absolute;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
 }
 
-.white-text {
-    color: white !important;
-}
-
-.timer {
-    font-size: 50px;
+.txt {
+    display: inline-block;
+    width: 110px;
+    font-size: 20px;
+    padding: 10px;
     font-family: "DejaVu Sans Mono", serif;
-    margin: 0 auto;
-    position: absolute;
-    left: 45%;
-    top: 650px;
-}
-
-.rating {
-    position: absolute;
-    top: 50px;
-    left: 80%;
-    font-size: 30px;
-}
-
-.start {
-    position: absolute;
-    top: 650px;
-    left: 80px;
-    width: auto;
-    padding: 16px;
-    height: auto;
-    font-size: 36px;
-    background-color: antiquewhite;
-    border: black 1px solid;
 }

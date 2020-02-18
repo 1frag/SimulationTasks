@@ -3,10 +3,7 @@ import aiohttp.web_ws
 import aiohttp_jinja2
 import asyncio
 import jinja2
-from typing import *
-from copy import deepcopy
-from enum import Enum, auto
-import json
+import math
 import logging
 import sys
 
@@ -18,209 +15,63 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 logger = logging.getLogger(__name__)
-DEFAULT_TIME = 30  # время на игру
-HISTORY = []  # результаты прошлых игр
 
-cur_time = None
-client_conf = {}
-queue = asyncio.Queue(maxsize=100)
-ws: Optional[aiohttp.web_ws.WebSocketResponse] = None
+G = 9.780
+DT = 0.1
 
 
-class State(Enum):
-    WHITE = 1
-    BLACK = 2
-    GREEN = 3
-    YELLOW = 4
-    RED = 5
-    BROWN = 6
+class Conf:
+    a, v0, h0, cosa, sina, is_stopped = [None] * 6
 
-    @staticmethod
-    def default(o):
-        if isinstance(o, State):
-            return o.value
-        else:
-            raise TypeError()
+    def get_x(self, t):
+        return self.v0 * self.cosa * t
 
-    def get_next(self):
-        return {
-            'WHITE': self.BLACK,
-            'BLACK': self.GREEN,
-            'GREEN': self.YELLOW,
-            'YELLOW': self.RED,
-            'RED': self.BROWN,
-            'BROWN': self.BROWN,
-        }[self.name]
+    def get_y(self, t):
+        return self.h0 + self.v0 * self.sina * t - G * t * t / 2
 
 
-class CustomEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, State):
-            return obj.value
-        return json.JSONEncoder.default(self, obj)
-
-
-def my_dumps(x):
-    return json.dumps(x, cls=CustomEncoder)
-
-
-DEFAULT_BUDGET = 100
-DEFAULT_SETTINGS = {
-    State.WHITE: None,
-    State.BLACK: 15,
-    State.GREEN: 12,
-    State.YELLOW: 9,
-    State.RED: 9,
-    State.BROWN: 'xxx',
-}
-NEXT_STATE = {
-    State.WHITE: State.BLACK,
-    State.BLACK: State.GREEN,
-    State.GREEN: State.YELLOW,
-    State.YELLOW: State.RED,
-    State.RED: State.BROWN,
-    State.BROWN: State.BROWN,
-}
-COSTS = {
-    State.WHITE: -2,
-    State.BLACK: -3,
-    State.GREEN: 1,
-    State.YELLOW: 3,
-    State.RED: 5,
-    State.BROWN: -5,
-}
-
-
-class Task:
-    class Type(Enum):
-        CLOSE = auto()
-        CHANGE_CONF = auto()
-        DO_IT = auto()
-        SEND = auto()
-        UPGRADE = auto()
-        NAME = auto()
-        END = auto()
-
-    def __init__(self, type_task: Type, data: Optional[Dict] = None):
-        self.type = type_task
-        self.data = data
-
-
-class Item:
-    color: State = State.WHITE
-    tick: int = 0
-    of: int = None
-
-    def next(self):
-        if self.of is not None:
-            self.tick += 1
-        if isinstance(self.of, int) and self.tick >= self.of:
-            self.tick = 0
-            self.color = NEXT_STATE[self.color]
-            self.of = client_conf['settings'][self.color]
-
-    def upgrade(self):
-        cost = COSTS[self.color]
-        if client_conf['score'] + cost < 0:
-            return False
-        client_conf['score'] += cost
-        if self.color == State.WHITE:
-            self.color = State.BLACK
-        else:
-            self.color = State.WHITE
-        self.tick = 0
-        self.of = client_conf['settings'][self.color]
-        return True
-
-
-async def send_history():
-    HISTORY.sort(key=lambda x: x['score'], reverse=True)
-    await ws.send_json({
-        'cmd': 'history',
-        'history': HISTORY,
-    }, dumps=my_dumps)
-
-
-async def updater():
-    global cur_time
-
-    def form(field):
-        nonlocal i
-        ret_val, i, j = [], 0, 0
-        for r in field:
-            for it in r:
-                ret_val.append({
-                    'i': i,
-                    'j': j,
-                    'color': it.color,
-                    'tick': it.tick,
-                    'of': it.of,
-                })
-                j += 1
-            i += 1
-            j = 0
-        return ret_val
-
+async def updater(ws, c: Conf, wait_for: asyncio.Future, queue):
+    if not await wait_for:
+        return
+    t = 0
     while True:
-        await asyncio.sleep(0.1)
-        cur_time -= 0.1
-        if cur_time <= 0:
-            queue.put_nowait(Task(type_task=Task.Type.END))
-            return
-        for row in client_conf['field']:
-            for i in row:  # type: Item
-                i.next()
-        queue.put_nowait(Task(type_task=Task.Type.SEND, data={
+        await asyncio.sleep(DT)
+        if c.is_stopped:
+            logger.debug('stopped')
+            await c.is_stopped
+        x, y = c.get_x(t), c.get_y(t)
+        await ws.send_json({
             'cmd': 'update',
-            'field': form(client_conf['field']),
-            'timer': int(cur_time),
-        }))
+            'x': x,
+            'y': y,
+            'time': t,
+        })
+        if y <= 0:
+            queue.put_nowait({'cmd': '_stop'})
+            break
+        t += DT
 
 
-async def reader():
+async def reader(ws, queue):
     if ws is None:
         raise Exception('ws must be not None')
     async for msg in ws:  # type: aiohttp.web_ws.WSMessage
         if msg.type == aiohttp.WSMsgType.ERROR:
-            break
-        try:
-            data = msg.json()
-            cmd = data.pop('cmd')
-            if cmd == 'change_conf':
-                queue.put_nowait(Task(
-                    type_task=Task.Type.CHANGE_CONF,
-                    data=data,
-                ))
-            elif cmd == 'do_it':
-                queue.put_nowait(Task(
-                    type_task=Task.Type.DO_IT,
-                    data=data,
-                ))
-            elif cmd == 'name':
-                queue.put_nowait(Task(
-                    type_task=Task.Type.NAME,
-                    data=data['name'],
-                ))
-            elif msg.type == aiohttp.WSMsgType.ERROR:
-                raise Exception('Websocket is closing')
-            else:
-                logger.warning(f'Unexpected command: {cmd=}')
-                raise NotImplementedError()
-        except Exception as e:
-            queue.put_nowait(Task(
-                type_task=Task.Type.CLOSE,
-                data={'error': e},
-            ))
+            queue.put_nowait({'cmd': '_stop'})
+        else:
+            queue.put_nowait(msg.json())
 
 
-def clean_up():
-    global client_conf, cur_time, queue, ws
-    if 'stop' in client_conf:
-        client_conf['stop']()
-    queue = asyncio.Queue(maxsize=100)
-    client_conf = {}
-    cur_time = None
-    ws = None
+async def resizer(ws, c: Conf):
+    D = (c.v0 * c.sina) ** 2 + 2 * G * c.h0
+    t_max = (c.v0 * c.sina + math.sqrt(D)) / G
+    max_x = c.get_x(t_max)
+    max_y = c.h0 + ((c.v0 * c.sina) ** 2) / (2 * G)
+    await ws.send_json({
+        'cmd': 'resize',
+        'maxX': max(3, max_x),
+        'maxY': max(3, max_y),
+    })
 
 
 @aiohttp_jinja2.template('index.html')
@@ -229,84 +80,41 @@ async def main_handler(request):
 
 
 async def websocket_handler(request: aiohttp.web.Request):
-    global ws, client_conf, cur_time
-    clean_up()
-    cur_time = DEFAULT_TIME
+    queue = asyncio.Queue(maxsize=100)
     ws = aiohttp.web.WebSocketResponse()
     await ws.prepare(request)
-    settings = deepcopy(DEFAULT_SETTINGS)
-    field = [
-        [Item() for _ in range(4)]
-        for _ in range(4)
-    ]
+    conf = Conf()
 
-    client_conf = {
-        'score': DEFAULT_BUDGET,
-        'field': field,
-        'settings': settings,
-    }
+    was_init = asyncio.Future()
+    _reader = asyncio.ensure_future(reader(ws, queue))
+    _updater = asyncio.ensure_future(updater(ws, conf, was_init, queue))
 
-    _reader = asyncio.ensure_future(reader())
-    _updater = asyncio.ensure_future(updater())
-
-    def _stop():
-        _reader.cancel()
-        _updater.cancel()
-
-    client_conf['stop'] = _stop
-
-    async def update_settings():
-        await ws.send_json({
-            'cmd': 'settings',
-            'settings': {i.value: j for i, j in settings.items()},
-        }, dumps=my_dumps)
-
-    await update_settings()
     while True:
-        msg: Task = await queue.get()
+        msg = await queue.get()
         try:
-            if msg.type == Task.Type.CLOSE:
-                if not ws.closed:
-                    logger.debug(msg.data)
-                    await ws.send_json(msg.data)
-                return
-            elif msg.type == Task.Type.SEND:
-                await ws.send_json(msg.data, dumps=my_dumps)
-            elif msg.type == Task.Type.DO_IT:
-                i, j = msg.data['i'], msg.data['j']
-                if field[i][j].upgrade():
-                    await ws.send_json({
-                        'cmd': 'update_score',
-                        'score': client_conf['score'],
-                    }, dumps=my_dumps)
-                else:
-                    await ws.send_json({
-                        'cmd': 'not_enough_money',
-                    }, dumps=my_dumps)
-            elif msg.type == Task.Type.CHANGE_CONF:
-                from_state = int(msg.data['no'])
-                new_value = int(msg.data['to'])
-                client_conf['settings'][{
-                    2: State.BLACK,
-                    3: State.GREEN,
-                    4: State.YELLOW,
-                    5: State.RED,
-                }[from_state]] = new_value
-                await update_settings()
-            elif msg.type == Task.Type.END:
-                await ws.send_json({
-                    'cmd': 'game_over',
-                    'score': client_conf['score']
-                }, dumps=my_dumps)
-            elif msg.type == Task.Type.NAME:
-                HISTORY.append({
-                    'name': msg.data,
-                    'score': client_conf['score'],
-                })
-                await send_history()
-                await ws.close()
+            logger.debug(msg)
+            if msg['cmd'] == '_stop':
+                _reader.cancel()
+                _updater.cancel()
+                break
+            elif msg['cmd'] == 'init':
+                conf.h0 = msg['h0']
+                conf.v0 = msg['v0']
+                conf.a = msg['a'] / 180 * math.pi
+                if msg['a'] < -90 or msg['a'] > 90:
+                    raise Exception('invalid angle')
+                conf.cosa = math.cos(conf.a)
+                conf.sina = math.sin(conf.a)
+                await resizer(ws, conf)
+                was_init.set_result(True)  # старт updater-у
+            elif msg['cmd'] == 'stop':
+                conf.is_stopped = asyncio.Future()
+            elif msg['cmd'] == 'continue':
+                conf.is_stopped.set_result(True)
         except Exception as e:
             logger.error(f'error: {e}')
+            await ws.send_json({'cmd': 'error'})
+            await ws.close()
 
 
 if __name__ == '__main__':

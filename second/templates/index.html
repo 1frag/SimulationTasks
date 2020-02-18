@@ -2,67 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Овощная ферма</title>
-    <script src="/first/static/script.js"></script>
+    <title>Полет без атмосферы</title>
+    <script src="/static/jquery.min.js" type="text/javascript"></script>
+    <script src="/static/script.js" type="text/javascript"></script>
 </head>
-<link rel="stylesheet" type="text/css" href="/first/static/style.css">
+<link rel="stylesheet" type="text/css" href="/static/style.css">
 <body>
-<div id="score" class="score">
-    100P
-</div>
-<div class="field">
-    <table border="1">
-        {% for i in range(4) %}
-        <tr>
-            {% for j in range(4) %}
-            <th id="{{'item{}{}'.format(i, j)}}"
-                onclick="DoIt(this, {{i}}, {{j}})"
-                class="item">
-                <div id="{{'inner{}{}'.format(i, j)}}"
-                     class="inner">
-                </div>
-            </th>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
+
+<div id="ticker" class="txt" style="width: auto !important">Тут будет таймер</div>
+
+<div id="conf">
+    <label for="height" class="txt">Height:</label>
+    <input type="number" min="0" id="height" placeholder="h0"/><br/>
+    <label for="angle" class="txt">Angle(°):</label>
+    <input type="number" min="-90" max="90" id="angle" placeholder="α"/><br/>
+    <label for="speed" class="txt">Speed:</label>
+    <input type="number" min="0" id="speed" placeholder="v0"/><br/>
+    <input type="button" onclick="StartExp(this)" class="button" value="Start"/>
+    <input type="button" onclick="StopExp(this)" class="button" value="Stop" id="manager"/>
 </div>
 
-<div class="conf">
-    {% for i in range(2, 6) %}
-    <div class="just-border">
-        <div class="rule {{'mark-{}'.format(i)}}"></div>
-        <div class="rule arrow">
-            <div class="conf-value"
-                 id="{{'conf-value{}'.format(i)}}"
-                 onclick="AskingConf(this)">
-            </div>
-        </div>
-        <div class="rule {{'mark-{}'.format(i+1)}}"></div>
-        <br/>
-    </div>
-    {% endfor %}
-    <label class="hidden-block">
-        <h3 id="about-change">for #x</h3>
-        <input type="number" min="1" max="1000" id="how-many">
-        <button onclick="SetNewConf()">Отправить</button>
-    </label>
-</div>
-
-<div class="timer" id="timer">
-<!--    02:36-->
-</div>
-
-<div class="rating">
-    <ol id="rating">
-<!--        <li>Vase [123P]</li>-->
-<!--        <li>Pety [85P]</li>-->
-<!--        <li>Igor [2P]</li>-->
-    </ol>
-</div>
-
-<div class="start" onclick="StartGame(this)">
-    START!
+<div id="graph" class="char">
+    <canvas id="cnvs" width="835" height="525">
+        <p>Ваш браузер не поддерживает рисование.</p>
+    </canvas>
 </div>
 
 </body>
