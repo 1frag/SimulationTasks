@@ -30,7 +30,7 @@ class Conf:
         self.a = a * math.pi / 180
         self.v0, self.h0, self.s, self.m = v0, h0, s, m
 
-    def prepare(self):
+    def _prepare(self):
         self._t = 0
         self._x = 0
         self._y = self.h0
@@ -40,18 +40,21 @@ class Conf:
         self._vx = self.v0 * self._cosa
         self._vy = self.v0 * self._sina
 
-    def __next__(self):
-        if self._y < 0:
-            raise StopIteration()
-        self.t += DT
-        v = math.sqrt(self._vx ** 2 + self._vy ** 2)
-        self._vx -= self._k * self._vx * v * DT
-        self._vy -= (G + self._k * self._vy * v) * DT
-        self._x += vx * DT
-        self._y += vy * DT
-        return self._x, self._y
+    def get_tracker(self):
+        self._prepare()
+        print(self._y)
+        while self._y >= 0:
+            self._t += DT
+            v = math.sqrt(self._vx ** 2 + self._vy ** 2)
+            self._vx -= self._k * self._vx * v * DT
+            self._vy -= (G + self._k * self._vy * v) * DT
+            self._x += self._vx * DT
+            self._y += self._vy * DT
+            yield self._x, self._y, self._t
 
     def validate(self):
+        if self.h0 < 0:
+            raise Exception('invalid height')
         if self.a < -90 or self.a > 90:
             raise Exception('invalid angle')
         if self.m < 0:
@@ -63,23 +66,18 @@ class Conf:
 async def updater(ws, c: Conf, wait_for: asyncio.Future, queue):
     if not await wait_for:
         return
-    t = 0
-    while True:
+    for x, y, t in c.get_tracker():
         await asyncio.sleep(DT)
         if c.is_stopped:
             logger.debug('stopped')
             await c.is_stopped
-        x, y = next(c)
         await ws.send_json({
             'cmd': 'update',
             'x': x,
             'y': y,
             'time': t,
         })
-        if y <= 0:
-            queue.put_nowait({'cmd': '_stop'})
-            break
-        t += DT
+    queue.put_nowait({'cmd': '_stop'})
 
 
 async def reader(ws, queue):
@@ -93,14 +91,10 @@ async def reader(ws, queue):
 
 
 async def resizer(ws, c: Conf):
-    D = (c.v0 * c.sina) ** 2 + 2 * G * c.h0
-    t_max = (c.v0 * c.sina + math.sqrt(D)) / G
-    max_x = c.get_x(t_max)
-    max_y = c.h0 + ((c.v0 * c.sina) ** 2) / (2 * G)
     await ws.send_json({
         'cmd': 'resize',
-        'maxX': max(3, max_x),
-        'maxY': max(3, max_y),
+        'maxX': max(3, max(c.get_tracker(), key=lambda t: t[0])[0]),
+        'maxY': max(3, max(c.get_tracker(), key=lambda t: t[1])[1]),
     })
 
 
@@ -129,7 +123,6 @@ async def websocket_handler(request: aiohttp.web.Request):
                 break
             elif msg['cmd'] == 'init':
                 conf.set_data(**msg)
-                conf.prepare()
                 conf.validate()
                 await resizer(ws, conf)
                 was_init.set_result(True)  # старт updater-у
@@ -138,7 +131,8 @@ async def websocket_handler(request: aiohttp.web.Request):
             elif msg['cmd'] == 'continue':
                 conf.is_stopped.set_result(True)
         except Exception as e:
-            logger.error(f'error: {e}')
+            import traceback
+            logger.error(''.join(traceback.format_exc()))
             await ws.send_json({'cmd': 'error'})
             await ws.close()
 

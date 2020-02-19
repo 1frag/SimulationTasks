@@ -62,6 +62,8 @@ function StartExp(btn) {
                     'h0': h0,
                     'a': parseFloat(document.getElementById('angle').value),
                     'v0': parseFloat(document.getElementById('speed').value),
+                    'm': parseFloat(document.getElementById('weight').value),
+                    's': parseFloat(document.getElementById('size').value),
                 }));
             } catch (e) {
                 console.error(e);
