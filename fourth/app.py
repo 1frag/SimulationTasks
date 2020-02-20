@@ -50,8 +50,10 @@ class Conf:
     @classmethod
     async def top_changer(cls):
         """ Корутина watch dog для cur_top """
+        global names
         while True:
             cls.clients = list(filter(lambda x: x.enable, cls.clients))
+            names = {c.login for c in cls.clients if c.enable}
             cls.cur_top = [
                 {'name': cl.login, 'money': cl.money}
                 for cl in sorted(cls.clients, key=lambda x: x.money)
