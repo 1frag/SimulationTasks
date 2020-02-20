@@ -1,0 +1,109 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Биржа</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+<script src="/static/jquery.min.js"></script>
+<script src="/static/highcharts.js"></script>
+<script src="/static/exporting.js"></script>
+<script src="/static/export-data.js"></script>
+<script src="/static/accessibility.js"></script>
+<script src="/static/script.js"></script>
+
+<figure class="highcharts-figure">
+    <div id="container"></div>
+    <div id="price" class="txt">Price:</div>
+    <br/>
+    <div id="money" class="txt">Money:</div>
+    <br/>
+    <div id="count" class="txt">Count:</div>
+    <br/>
+    <button class="btn" onclick="sendCmd('buy')">Buy 1 more</button>
+    <button class="btn" onclick="sendCmd('sell')">Sell 1 more</button>
+</figure>
+
+<div class="rating">
+    <ol id="rating">
+
+    </ol>
+</div>
+
+
+<script type="text/javascript">
+    function drawChart() {
+        Highcharts.chart('container', {
+            chart: {
+                type: 'spline',
+                animation: Highcharts.svg, // don't animate in old IE
+                marginRight: 10,
+                events: {
+                    load: function () {
+                        // set up the updating of the chart each second
+                        series = this.series[0];
+                    }
+                }
+            },
+
+            time: {
+                useUTC: false
+            },
+
+            title: {
+                text: 'Exchange rate'
+            },
+
+            accessibility: {
+                announceNewData: {
+                    enabled: true,
+                    minAnnounceInterval: 15000,
+                    announcementFormatter: function (allSeries, newSeries, newPoint) {
+                        if (newPoint) {
+                            return 'New point added. Value: ' + newPoint.y;
+                        }
+                        return false;
+                    }
+                }
+            },
+
+            xAxis: {
+                type: 'datetime',
+                tickPixelInterval: 150
+            },
+
+            yAxis: {
+                title: {
+                    text: 'Value'
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }]
+            },
+
+            tooltip: {
+                headerFormat: '<b>{point.y:.2f} бурлей за 1 акцию</b><br/>',
+                pointFormat: '<p>{point.x:%Y-%m-%d %H:%M:%S}</p>'
+            },
+
+            legend: {
+                enabled: false
+            },
+
+            exporting: {
+                enabled: false
+            },
+
+            series: [{
+                name: 'Курс акции',
+                data: PreviousData,
+            }]
+        });
+    }
+</script>
+</body>
+</html>
