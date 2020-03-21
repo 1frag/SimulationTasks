@@ -49,8 +49,10 @@ class Conf:
             def runner(rule):
                 def cb(to, coef):
                     self._queue.put_nowait((to, v * coef))
+
                 f = asyncio.ensure_future(asyncio.sleep(rule.get('delay', 1)))
                 f.add_done_callback(lambda _: cb(rule['to'], rule['coef']))
+
             runner(r)
 
     def update(self):
@@ -63,8 +65,14 @@ class Conf:
             pass
         for k, v in summary.items():
             prev, self.values[k] = self.values[k], max(self.values[k] + v, 0)
-            if self.values[k] - prev:
+            if k == 'prore':
+                self.act(k, self.get_profit(), v_is_s=True)
+            if self.values[k] - prev != 0:
                 self.act(k, self.values[k] - prev, v_is_s=True)
+
+    def get_profit(self):
+        return (self.values['cosdi'] * self.values['couor'] - self.values['arebu']
+                - self.values['arebu'] - self.values['salpe'] * self.values['stuff'])
 
 
 async def updater(ws, c: Conf):

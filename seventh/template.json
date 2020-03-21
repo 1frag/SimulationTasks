@@ -74,7 +74,7 @@
         {
             "from": "visre",
             "to": "couor",
-            "coef": 0.2
+            "coef": 7
         },
         {
             "from": "difme",
