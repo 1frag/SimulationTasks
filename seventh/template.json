@@ -1,0 +1,152 @@
+{
+    "fields": [
+        {
+            "id": "visre",
+            "name": "Посещаемость ресторана",
+            "initial": 30,
+            "in": "человек в час",
+            "type": "int>0"
+        },
+        {
+            "id": "difme",
+            "name": "Разнообразие меню",
+            "initial": 60,
+            "in": "блюд",
+            "type": "int>0"
+        },
+        {
+            "id": "quase",
+            "name": "Качество обслуживания",
+            "initial": 70,
+            "in": "% удовольствия"
+        },
+        {
+            "id": "stuff",
+            "name": "Персонал",
+            "initial": 15,
+            "in": "человек",
+            "type": "int>0"
+        },
+        {
+            "id": "couor",
+            "name": "Количество заказов (блюд)",
+            "initial": 80,
+            "atom": 4,
+            "in": "блюд в час"
+        },
+        {
+            "id": "prore",
+            "name": "Прибыль ресторана",
+            "initial": 1000000,
+            "atom": 50000,
+            "in": "фантиков в месяц"
+        },
+        {
+            "id": "arebu",
+            "name": "Аренда помещения",
+            "initial": 50000,
+            "atom": 1000,
+            "in": "фантиков в месяц"
+        },
+        {
+            "id": "salpe",
+            "name": "Зарплата персонала",
+            "initial": 30000,
+            "atom": 1000,
+            "in": "средняя по ресторану [фантиков в месяц]"
+        },
+        {
+            "id": "cosdi",
+            "name": "Стоимость блюд",
+            "initial": 300,
+            "in": "в среднем фантиков на блюдо"
+        },
+        {
+            "id": "pripr",
+            "name": "Цена на продукты",
+            "initial": 60,
+            "in": "условных единиц"
+        }
+    ],
+    "depends": [
+        {
+            "from": "visre",
+            "to": "difme",
+            "coef": 0.2,
+            "like": "GROW"
+        },
+        {
+            "from": "visre",
+            "to": "couor",
+            "coef": 0.2,
+            "like": "GROW"
+        },
+        {
+            "from": "difme",
+            "to": "visre",
+            "coef": 0.2,
+            "like": "GROW"
+        },
+        {
+            "from": "quase",
+            "to": "visre",
+            "coef": 0.2,
+            "like": "GROW"
+        },
+        {
+            "from": "stuff",
+            "to": "quase",
+            "coef": 0.2,
+            "like": "GROW"
+        },
+        {
+            "from": "stuff",
+            "to": "salpe",
+            "coef": 0.2,
+            "like": "GROW"
+        },
+        {
+            "from": "couor",
+            "to": "stuff",
+            "coef": 0.2,
+            "like": "GROW"
+        },
+        {
+            "from": "couor",
+            "to": "prore",
+            "coef": 25,
+            "like": "GROW"
+        },
+        {
+            "from": "prore",
+            "to": "salpe",
+            "coef": 0.2,
+            "like": "GROW"
+        },
+        {
+            "from": "arebu",
+            "to": "prore",
+            "coef": 0.2,
+            "like": "FALL"
+        },
+        {
+            "from": "cosdi",
+            "to": "visre",
+            "coef": 0.2,
+            "like": "FALL",
+            "delay": 5
+        },
+        {
+            "from": "cosdi",
+            "to": "prore",
+            "coef": 0.2,
+            "like": "GROW"
+        },
+        {
+            "from": "pripr",
+            "to": "cosdi",
+            "coef": 0.2,
+            "like": "GROW"
+        }
+    ]
+}
