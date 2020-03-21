@@ -35,7 +35,7 @@ REST_TIME = 1  # sec, to sleep between changes at client-side
 
 
 class Conf:
-    template = json.load(open('./template.json'))
+    template = json.load(open(os.path.dirname(os.path.realpath(__file__)) + '/template.json'))
     fields = {x['id']: x for x in template['fields']}
 
     def __init__(self):
