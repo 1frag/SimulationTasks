@@ -108,7 +108,7 @@
         {
             "from": "couor",
             "to": "stuff",
-            "coef": 0.2,
+            "coef": 0.02,
             "like": "GROW"
         },
         {
