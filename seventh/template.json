@@ -4,15 +4,13 @@
             "id": "visre",
             "name": "Посещаемость ресторана",
             "initial": 30,
-            "in": "человек в час",
-            "type": "int>0"
+            "in": "человек в час"
         },
         {
             "id": "difme",
             "name": "Разнообразие меню",
             "initial": 60,
-            "in": "блюд",
-            "type": "int>0"
+            "in": "блюд"
         },
         {
             "id": "quase",
@@ -24,8 +22,7 @@
             "id": "stuff",
             "name": "Персонал",
             "initial": 15,
-            "in": "человек",
-            "type": "int>0"
+            "in": "человек"
         },
         {
             "id": "couor",
@@ -72,81 +69,68 @@
         {
             "from": "visre",
             "to": "difme",
-            "coef": 0.2,
-            "like": "GROW"
+            "coef": 0.2
         },
         {
             "from": "visre",
             "to": "couor",
-            "coef": 0.2,
-            "like": "GROW"
+            "coef": 0.2
         },
         {
             "from": "difme",
             "to": "visre",
-            "coef": 0.2,
-            "like": "GROW"
+            "coef": 0.2
         },
         {
             "from": "quase",
             "to": "visre",
-            "coef": 0.2,
-            "like": "GROW"
+            "coef": 0.2
         },
         {
             "from": "stuff",
             "to": "quase",
-            "coef": 0.2,
-            "like": "GROW"
+            "coef": 0.2
         },
         {
             "from": "stuff",
             "to": "salpe",
-            "coef": 0.2,
-            "like": "GROW"
+            "coef": 0.2
         },
         {
             "from": "couor",
             "to": "stuff",
-            "coef": 0.02,
-            "like": "GROW"
+            "coef": 0.02
         },
         {
             "from": "couor",
             "to": "prore",
-            "coef": 25,
-            "like": "GROW"
+            "coef": 25
         },
         {
             "from": "prore",
             "to": "salpe",
-            "coef": 0.2,
-            "like": "GROW"
+            "coef": 0.2
         },
         {
             "from": "arebu",
             "to": "prore",
-            "coef": 0.2,
-            "like": "FALL"
+            "coef": -0.2
         },
         {
             "from": "cosdi",
             "to": "visre",
-            "coef": 0.2,
-            "like": "FALL",
+            "coef": -0.2,
             "delay": 5
         },
         {
             "from": "cosdi",
             "to": "prore",
-            "coef": 0.2,
-            "like": "GROW"
+            "coef": 0.2
         },
         {
             "from": "pripr",
             "to": "cosdi",
-            "coef": 0.2,
-            "like": "GROW"
+            "coef": 0.2
         }
     ]
 }

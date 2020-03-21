@@ -16,7 +16,11 @@ function Start(btn) {
             if (data['cmd'] === 'update') {
                 data['values'].forEach(function (e) {
                     let el = document.getElementById(e['id'] + 'text');
-                    el.innerText = e['value'].toFixed(2);
+                    if (['difme', 'stuff'].includes(e['id']))
+                        el.innerText = ''+Math.round(e['value']);
+                    else
+                        el.innerText = e['value'].toFixed(2);
+
                 });
             }
         };

@@ -8,7 +8,6 @@ import os
 import sys
 import json
 import traceback
-import copy
 
 server_conf = dict(host='0.0.0.0', port=sys.argv[1] if len(sys.argv) > 1 else 8080)
 app = aiohttp.web.Application()
@@ -40,12 +39,12 @@ class Conf:
     fields = {x['id']: x for x in template['fields']}
 
     def __init__(self):
-        self._values = {x['id']: x['initial'] for x in self.template['fields']}
+        self.values = {x['id']: x['initial'] for x in self.template['fields']}
         self._queue = asyncio.Queue()
 
     def act(self, uuid, s, v_is_s=False):
         v = s if v_is_s else (self.fields[uuid].get('atom', 1) * (1 if s == '+' else -1))
-        self._values[uuid] += v
+        self.values[uuid] += v
         for r in filter(lambda x: x['from'] == uuid, self.template['depends']):
             def runner(rule):
                 def cb(to, coef):
@@ -60,14 +59,12 @@ class Conf:
             while True:
                 uuid, value = self._queue.get_nowait()
                 summary[uuid] += value
-                self._values[uuid] += value
-                if self.fields[uuid].get('type') == 'int>0':
-                    self._values[uuid] = int(max(self._values[uuid], 0))
         except asyncio.QueueEmpty:
             pass
         for k, v in summary.items():
-            if v:
-                self.act(k, v, v_is_s=True)
+            prev, self.values[k] = self.values[k], max(self.values[k] + v, 0)
+            if self.values[k] - prev:
+                self.act(k, self.values[k] - prev, v_is_s=True)
 
 
 async def updater(ws, c: Conf):
@@ -76,7 +73,11 @@ async def updater(ws, c: Conf):
         c.update()
         await ws.send_json({
             'cmd': 'update',
-            'values': [{'id': k, 'value': v} for k, v in c._values.items()],
+            'values': [{
+                'id': k,
+                'value': v,
+                'int': c.fields[k]
+            } for k, v in c.values.items()],
         })
 
 
