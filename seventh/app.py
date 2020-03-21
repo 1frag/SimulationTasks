@@ -12,7 +12,8 @@ import copy
 
 server_conf = dict(host='0.0.0.0', port=sys.argv[1] if len(sys.argv) > 1 else 8080)
 app = aiohttp.web.Application()
-aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
+path = os.path.dirname(os.path.realpath(__file__))
+aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(path + '/templates'))
 logging.basicConfig(
     format='[%(lineno)d] %(message)s',
     level=logging.DEBUG,
@@ -35,7 +36,7 @@ REST_TIME = 1  # sec, to sleep between changes at client-side
 
 
 class Conf:
-    template = json.load(open(os.path.dirname(os.path.realpath(__file__)) + '/template.json'))
+    template = json.load(open(path + '/template.json'))
     fields = {x['id']: x for x in template['fields']}
 
     def __init__(self):
