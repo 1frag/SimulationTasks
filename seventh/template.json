@@ -107,11 +107,6 @@
             "coef": 25
         },
         {
-            "from": "prore",
-            "to": "salpe",
-            "coef": 0.2
-        },
-        {
             "from": "arebu",
             "to": "prore",
             "coef": -0.2
