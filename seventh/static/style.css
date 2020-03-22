@@ -3,7 +3,7 @@
     left: 500px;
     top: 30px;
     padding: 5px;
-    height: 20px;
+    height: auto;
     width: 100px;
     border: black solid 1px;
     background-color: #e7e7e7;
@@ -27,8 +27,11 @@
 .text {
     position: absolute;
     border: black solid 1px;
-    font-size: 12px;
     width: auto;
     padding: 2px;
-    height: 12px;
+    height: auto;
+}
+
+* {
+    font-size: 12px;
 }

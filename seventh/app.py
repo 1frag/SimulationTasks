@@ -20,19 +20,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 REST_TIME = 1  # sec, to sleep between changes at client-side
 
-"""                                 0  |  1  |  2  |  3  |  4  |  5  |  6  |  7  |  8  |  9  |
-[visre] Посещаемость ресторана  0)  X  |  ↗  |     |     |  ↗  |     |     |     |     |     |
-[difme] Разнообразие меню       1)  ↗  |  X  |     |     |     |     |     |     |     |     |
-[quase] Качество обслуживания   2)  ↗  |     |  X  |     |     |     |     |     |     |     |
-[stuff] Персонал                3)     |     |  ↗  |  X  |     |     |     |  ↗  |     |     |
-[couor] Количество заказов      4)     |     |     |  ↗  |  X  |  ↗  |     |     |     |     |
-[prore] Прибыль ресторана       5)     |     |     |     |     |  X  |     |  ↗  |     |     |
-[arebu] Аренда помещения        6)     |     |     |     |     |  ↘  |  X  |     |     |     |
-[salpe] Зарплата персонала      7)     |     |     |     |     |     |     |  X  |     |     |
-[cosdi] Стоимость блюд          8)  ↘' |     |     |     |     |  ↗  |     |     |  X  |     |
-[pripr] Цена на продукты        9)     |     |     |     |     |     |     |     |  ↗  |  X  |
-"""
-
 
 class Conf:
     template = json.load(open(path + '/template.json'))
@@ -125,11 +112,16 @@ async def websocket_handler(request: aiohttp.web.Request):
             await ws.close()
 
 
+async def meta_handler(request):
+    return aiohttp.web.json_response(Conf.template)
+
+
 if __name__ == '__main__':
     cur_dir = os.path.dirname(os.path.realpath(__file__))
     app.add_routes([
         aiohttp.web.get('/', main_handler),
         aiohttp.web.get('/ws', websocket_handler),
         aiohttp.web.static('/static', os.path.join(cur_dir, 'static')),
+        aiohttp.web.get('/meta', meta_handler),
     ])
     aiohttp.web.run_app(app, **server_conf)
