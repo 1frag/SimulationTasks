@@ -1,0 +1,37 @@
+#start {
+    position: absolute;
+    left: 500px;
+    top: 30px;
+    padding: 5px;
+    height: auto;
+    width: 100px;
+    border: black solid 1px;
+    background-color: #e7e7e7;
+    text-align: center;
+}
+
+.grow {
+    position: absolute;
+    background-color: green;
+    width: 20px;
+    height: 12px;
+}
+
+.fall {
+    position: absolute;
+    background-color: red;
+    width: 20px;
+    height: 12px;
+}
+
+.text {
+    position: absolute;
+    border: black solid 1px;
+    width: auto;
+    padding: 2px;
+    height: auto;
+}
+
+* {
+    font-size: 12px;
+}
