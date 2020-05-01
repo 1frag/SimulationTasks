@@ -41,14 +41,14 @@
         {
             "id": "arebu",
             "name": "Аренда помещения",
-            "initial": 50000,
+            "initial": 420000,
             "atom": 1000,
             "in": "Количество фантиков в месяц"
         },
         {
             "id": "salpe",
             "name": "Зарплата персонала",
-            "initial": 60000,
+            "initial": 40000,
             "atom": 1000,
             "in": "Среднее количество зарплатных фантиков"
         },
@@ -68,8 +68,18 @@
     "depends": [
         {
             "from": "visre",
+            "to": "arebu",
+            "coef": 10000
+        },
+        {
+            "from": "difme",
+            "to": "pripr",
+            "coef": 0.4
+        },
+        {
+            "from": "visre",
             "to": "difme",
-            "coef": 0.2
+            "coef": 0.02
         },
         {
             "from": "visre",
@@ -79,7 +89,7 @@
         {
             "from": "difme",
             "to": "visre",
-            "coef": 0.2
+            "coef": 0.02
         },
         {
             "from": "quase",
@@ -94,12 +104,12 @@
         {
             "from": "stuff",
             "to": "salpe",
-            "coef": 0.2
+            "coef": 1000
         },
         {
             "from": "couor",
             "to": "stuff",
-            "coef": 0.02
+            "coef": 0.125
         },
         {
             "from": "couor",
@@ -114,7 +124,7 @@
         {
             "from": "cosdi",
             "to": "visre",
-            "coef": -0.2,
+            "coef": -2,
             "delay": 5
         },
         {
@@ -125,7 +135,7 @@
         {
             "from": "pripr",
             "to": "cosdi",
-            "coef": 0.2
+            "coef": 1.6
         }
     ]
 }

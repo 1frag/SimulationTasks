@@ -79,6 +79,7 @@ function changeContextMenu(top, left) {
         if ( (l - left) * (l - left) + (t - top) * (t - top) <= RADIUS * RADIUS) {
             $('#i1')[0].innerText = e['name'];
             $('#i2')[0].innerText = e['in'];
+            $('#i3')[0].innerText = 'UUID: ' + e['id'];
             result = true;
         }
     });

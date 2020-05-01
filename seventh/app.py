@@ -58,7 +58,10 @@ class Conf:
                 self.act(k, self.values[k] - prev, v_is_s=True)
 
     def get_profit(self):
-        return (8 * 30 * self.values['cosdi'] * self.values['couor'] - self.values['arebu']
+        WORKING_DAYS_PER_MONTH = 30
+        WORKING_HOURS_PER_DAY = 8
+        return (WORKING_DAYS_PER_MONTH * WORKING_HOURS_PER_DAY *
+                self.values['cosdi'] * self.values['couor'] - self.values['arebu']
                 - self.values['arebu'] - self.values['salpe'] * self.values['stuff'])
 
 
@@ -90,7 +93,7 @@ async def main_handler(request):
 
 
 async def websocket_handler(request: aiohttp.web.Request):
-    queue = asyncio.Queue(maxsize=100)
+    queue = asyncio.Queue()
     ws = aiohttp.web.WebSocketResponse()
     await ws.prepare(request)
     conf = Conf()
