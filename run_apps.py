@@ -38,7 +38,7 @@ def all_directories_with_templates():
 def trust_key_required(func):
     def inner(request):
         try:
-            key = request.headers['Authorization']
+            key = request.headers.get('Authorization')
             if key != os.getenv('TRUST_KEY', key):
                 raise KeyError
         except KeyError:

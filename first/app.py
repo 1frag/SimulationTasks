@@ -2,29 +2,13 @@ import aiohttp.web
 import aiohttp.web_ws
 import aiohttp_jinja2
 import asyncio
-import jinja2
 from typing import *
 from copy import deepcopy
 from enum import Enum, auto
 import json
-import logging
-import sys
+import os
 
-server_conf = dict(host='0.0.0.0', port=sys.argv[1] if len(sys.argv) > 1 else 8080)
-app = aiohttp.web.Application()
-aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
-logging.basicConfig(
-    format='[%(lineno)d] %(message)s',
-    level=logging.DEBUG,
-)
-logger = logging.getLogger(__name__)
-DEFAULT_TIME = 30  # время на игру
-HISTORY = []  # результаты прошлых игр
-
-cur_time = None
-client_conf = {}
-queue = asyncio.Queue(maxsize=100)
-ws: Optional[aiohttp.web_ws.WebSocketResponse] = None
+from common.utils import init
 
 
 class State(Enum):
@@ -52,33 +36,6 @@ class CustomEncoder(json.JSONEncoder):
 
 def my_dumps(x):
     return json.dumps(x, cls=CustomEncoder)
-
-
-DEFAULT_BUDGET = 100
-DEFAULT_SETTINGS = {
-    State.WHITE: None,
-    State.BLACK: 15,
-    State.GREEN: 12,
-    State.YELLOW: 9,
-    State.RED: 9,
-    State.BROWN: 'xxx',
-}
-NEXT_STATE = {
-    State.WHITE: State.BLACK,
-    State.BLACK: State.GREEN,
-    State.GREEN: State.YELLOW,
-    State.YELLOW: State.RED,
-    State.RED: State.BROWN,
-    State.BROWN: State.BROWN,
-}
-COSTS = {
-    State.WHITE: -2,
-    State.BLACK: -3,
-    State.GREEN: 1,
-    State.YELLOW: 3,
-    State.RED: 5,
-    State.BROWN: -5,
-}
 
 
 class Task:
@@ -299,10 +256,41 @@ async def websocket_handler(request: aiohttp.web.Request):
             logger.error(f'error: {e}')
 
 
-if __name__ == '__main__':
-    app.add_routes([
-        aiohttp.web.get('/', main_handler),
-        aiohttp.web.get('/ws', websocket_handler),
-        aiohttp.web.static('/static', 'static'),
-    ])
-    aiohttp.web.run_app(app, **server_conf)
+handlers = [
+    aiohttp.web.get('/', main_handler),
+    aiohttp.web.get('/ws', websocket_handler),
+]
+logger, render = init(os.curdir)
+DEFAULT_TIME = 30  # время на игру
+HISTORY = []  # результаты прошлых игр
+
+cur_time = DEFAULT_TIME
+client_conf = {}
+queue = asyncio.Queue(maxsize=100)
+ws: Optional[aiohttp.web_ws.WebSocketResponse] = None
+
+DEFAULT_BUDGET = 100
+DEFAULT_SETTINGS = {
+    State.WHITE: None,
+    State.BLACK: 15,
+    State.GREEN: 12,
+    State.YELLOW: 9,
+    State.RED: 9,
+    State.BROWN: 'xxx',
+}
+NEXT_STATE = {
+    State.WHITE: State.BLACK,
+    State.BLACK: State.GREEN,
+    State.GREEN: State.YELLOW,
+    State.YELLOW: State.RED,
+    State.RED: State.BROWN,
+    State.BROWN: State.BROWN,
+}
+COSTS = {
+    State.WHITE: -2,
+    State.BLACK: -3,
+    State.GREEN: 1,
+    State.YELLOW: 3,
+    State.RED: 5,
+    State.BROWN: -5,
+}
