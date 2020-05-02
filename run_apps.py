@@ -55,10 +55,14 @@ async def start(dirname, num):
     spec = importlib.util.spec_from_file_location(app_name, app_name)
     app_file = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(app_file)
+    if hasattr(app_file, 'on_start'):
+        app_file.on_start()  # noqa
     cur_app = aiohttp.web.Application()
-    cur_app.add_routes(app_file.handlers + ([
+    cur_app.add_routes(app_file.handlers + ([  # noqa
         aiohttp.web.static('/static', static_path),
-    ] if os.path.isdir(static_path) else []))
+    ] if os.path.isdir(static_path) else []) + [
+        aiohttp.web.static('/common', 'common/static'),
+    ])
     aiohttp_jinja2.setup(cur_app, loader=jinja2.FileSystemLoader(templates_path))
     runner = aiohttp.web.AppRunner(cur_app)
     await runner.setup()

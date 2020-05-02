@@ -3,9 +3,7 @@ import aiohttp_jinja2
 import random
 import json
 from typing import List
-import os
-
-from common.utils import init
+import logging
 
 
 async def main_handler(request: aiohttp.web.Request):
@@ -34,7 +32,7 @@ async def main_handler(request: aiohttp.web.Request):
             })
 
 
-logger, render = init(os.curdir)
+logger = logging.getLogger(__name__)
 handlers = [
     aiohttp.web.route('*', '/', main_handler),
 ]

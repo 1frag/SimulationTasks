@@ -4,29 +4,10 @@ import aiohttp_jinja2
 import asyncio
 import jinja2
 import logging
-import os
 import random
 import sys
 import time
 import traceback
-
-server_conf = dict(host='0.0.0.0', port=sys.argv[1] if len(sys.argv) > 1 else 8080)
-app = aiohttp.web.Application()
-aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./fourth/templates'))
-logging.basicConfig(
-    format='[%(lineno)d] %(message)s',
-    level=logging.DEBUG,
-)
-logger = logging.getLogger(__name__)
-COUNT_ONCE = 20
-K, DATA = 0.02, []
-INITIAL_VALUE = {'y': 73.95}
-currency_changed = {
-    'cond': asyncio.Condition(),
-}
-DEFAULT_MONEY = 5000
-DEFAULT_COUNT = 0
-names = set()
 
 
 class Conf:
@@ -178,13 +159,23 @@ async def update_currency():
         await asyncio.sleep(1)
 
 
-if __name__ == '__main__':
-    cur_dir = os.path.dirname(os.path.realpath(__file__))
-    app.add_routes([
-        aiohttp.web.get('/', main_handler),
-        aiohttp.web.get('/ws', websocket_handler),
-        aiohttp.web.static('/static', os.path.join(cur_dir, 'static')),
-    ])
+def on_start():
     asyncio.ensure_future(update_currency())
     asyncio.ensure_future(Conf.top_changer())
-    aiohttp.web.run_app(app, **server_conf)
+
+
+handlers = [
+    aiohttp.web.get('/', main_handler),
+    aiohttp.web.get('/ws', websocket_handler),
+]
+logger = logging.getLogger(__name__)
+COUNT_ONCE = 20
+K, DATA = 0.02, []
+INITIAL_VALUE = {'y': 73.95}
+currency_changed = {
+    'cond': asyncio.Condition(),
+}
+DEFAULT_MONEY = 5000
+DEFAULT_COUNT = 0
+names = set()
+

@@ -7,19 +7,6 @@ import math
 import logging
 import sys
 
-server_conf = dict(host='0.0.0.0', port=sys.argv[1] if len(sys.argv) > 1 else 8080)
-app = aiohttp.web.Application()
-aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('./templates'))
-logging.basicConfig(
-    format='[%(lineno)d] %(message)s',
-    level=logging.DEBUG,
-)
-logger = logging.getLogger(__name__)
-
-G = 9.780
-DT = 0.1
-
-
 class Conf:
     a, v0, h0, cosa, sina, is_stopped = [None] * 6
 
@@ -117,10 +104,11 @@ async def websocket_handler(request: aiohttp.web.Request):
             await ws.close()
 
 
-if __name__ == '__main__':
-    app.add_routes([
-        aiohttp.web.get('/', main_handler),
-        aiohttp.web.get('/ws', websocket_handler),
-        aiohttp.web.static('/static', 'static'),
-    ])
-    aiohttp.web.run_app(app, **server_conf)
+handlers = [
+    aiohttp.web.get('/', main_handler),
+    aiohttp.web.get('/ws', websocket_handler),
+]
+logger = logging.getLogger(__name__)
+
+G = 9.780
+DT = 0.1

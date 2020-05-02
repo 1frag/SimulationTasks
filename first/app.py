@@ -6,9 +6,7 @@ from typing import *
 from copy import deepcopy
 from enum import Enum, auto
 import json
-import os
-
-from common.utils import init
+import logging
 
 
 class State(Enum):
@@ -260,7 +258,7 @@ handlers = [
     aiohttp.web.get('/', main_handler),
     aiohttp.web.get('/ws', websocket_handler),
 ]
-logger, render = init(os.curdir)
+logger = logging.getLogger(__name__)
 DEFAULT_TIME = 30  # время на игру
 HISTORY = []  # результаты прошлых игр
 

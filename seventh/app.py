@@ -9,20 +9,9 @@ import sys
 import json
 import traceback
 
-server_conf = dict(host='0.0.0.0', port=sys.argv[1] if len(sys.argv) > 1 else 8080)
-app = aiohttp.web.Application()
-path = os.path.dirname(os.path.realpath(__file__))
-aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(path + '/templates'))
-logging.basicConfig(
-    format='[%(lineno)d] %(message)s',
-    level=logging.DEBUG,
-)
-logger = logging.getLogger(__name__)
-REST_TIME = 1  # sec, to sleep between changes at client-side
-
 
 class Conf:
-    template = json.load(open(path + '/template.json'))
+    template = json.load(open(os.path.join(os.path.dirname(__file__), 'template.json')))
     fields = {x['id']: x for x in template['fields']}
 
     def __init__(self):
@@ -119,12 +108,10 @@ async def meta_handler(request):
     return aiohttp.web.json_response(Conf.template)
 
 
-if __name__ == '__main__':
-    cur_dir = os.path.dirname(os.path.realpath(__file__))
-    app.add_routes([
-        aiohttp.web.get('/', main_handler),
-        aiohttp.web.get('/ws', websocket_handler),
-        aiohttp.web.static('/static', os.path.join(cur_dir, 'static')),
-        aiohttp.web.get('/meta', meta_handler),
-    ])
-    aiohttp.web.run_app(app, **server_conf)
+handlers = [
+    aiohttp.web.get('/', main_handler),
+    aiohttp.web.get('/ws', websocket_handler),
+    aiohttp.web.get('/meta', meta_handler),
+]
+logger = logging.getLogger(__name__)
+REST_TIME = 1  # sec, to sleep between changes at client-side
