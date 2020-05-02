@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Eighth lab</title>
+</head>
+<style>
+    .frame {
+        border: 1px black solid;
+        padding: 10px;
+    }
+
+    .wrong {
+        border: 1px black solid;
+    }
+
+    .big {
+        width: 400px;
+        height: 400px;
+    }
+</style>
+<script>
+    function FirstAnswer() {
+        let inp = document.getElementsByName('first_prob')[0];
+        try {
+            let p = parseFloat(inp.value);
+            let url = document.location.href;
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                success: success,
+                dataType: dataType
+            });
+        } catch (e) {
+
+            alert('Incorrect value');
+        }
+        fetch()
+    }
+</script>
+<body>
+
+<div class="big frame">
+    <div class="frame">
+        Should I go to University today?
+    </div>
+    <label>
+        <i>Probability for "NO"</i>
+        <input type="number" name="first_prob">
+    </label><br/>
+    <input type="button" value="answer" onclick="FirstAnswer()">
+</div>
+
+</body>
+</html>

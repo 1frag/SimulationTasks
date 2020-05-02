@@ -1,4 +1,5 @@
-jinja2
-aiohttp
+jinja2~=2.11.2
+aiohttp~=3.6.2
 aiohttp_jinja2
-asyncio
+asyncio~=3.4.3
+num2words~=0.5.10
