@@ -1,1 +1,1 @@
-web: python seventh/app.py $PORT
+web: python run_apps.py all

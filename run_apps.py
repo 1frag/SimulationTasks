@@ -8,11 +8,12 @@ import aiohttp_jinja2
 import jinja2
 import logging
 import traceback
+import argparse
 from typing import Dict, Tuple
 
 BASE_PORT = 8800
 logging.basicConfig(
-    format='[%(lineno)d] %(message)s',
+    format='%(levelname)s: [%(filename)s at %(lineno)d] %(message)s',
     level=logging.DEBUG,
 )
 CURRENT_APPS = dict()  # type: Dict[str, Tuple[aiohttp.web.AppRunner, aiohttp.web.TCPSite]]
@@ -143,6 +144,13 @@ async def graceful_shutdown(application):
         logger.info('graceful_shutdown has been successfully completed')
 
 
+async def initial_startup(application):
+    if len(sys.argv) > 1:
+        for dirname, num in pull_from_target(sys.argv[1]):
+            await start(dirname, num)
+    logger.info('Application started')
+
+
 if __name__ == '__main__':
     app = aiohttp.web.Application()
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('.'))
@@ -154,6 +162,6 @@ if __name__ == '__main__':
         aiohttp.web.post('/debug', debug_handler),
     ])
     app.on_shutdown.append(graceful_shutdown)
+    app.on_startup.append(initial_startup)
     logger = logging.getLogger(__name__)
-    port = sys.argv[1] if len(sys.argv) > 1 else BASE_PORT
-    aiohttp.web.run_app(app, port=port)
+    aiohttp.web.run_app(app, port=BASE_PORT)

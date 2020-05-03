@@ -20,12 +20,18 @@ async def main_handler(request: aiohttp.web.Request):
     else:
         try:
             data = await request.json()
+            algo = data['algo']
             ps = data['p']
+            if algo == 'one':
+                return aiohttp.web.json_response({
+                    'status': 200,
+                    'result': int(random.random() > ps),
+                })
             return aiohttp.web.json_response({
                 'status': 200,
                 'result': choose(ps),
             })
-        except (KeyError, ValueError, json.JSONDecodeError) as e:
+        except (KeyError, ValueError, json.JSONDecodeError, TypeError) as e:
             return aiohttp.web.json_response({
                 'status': 400,
                 'reason': str(e),

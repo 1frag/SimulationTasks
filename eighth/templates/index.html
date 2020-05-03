@@ -3,54 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <title>Eighth lab</title>
+    <script src="/common/jquery.min.js"></script>
+    <link rel="stylesheet" href="/common/bootstrap.min.css">
 </head>
 <style>
     .frame {
         border: 1px black solid;
         padding: 10px;
+        margin: 10px;
     }
 
     .wrong {
-        border: 1px black solid;
+        border: 3px red solid;
     }
 
     .big {
         width: 400px;
-        height: 400px;
+        height: 300px;
+    }
+
+    .right {
+        margin-top: -310px;
+        margin-left: 600px;
     }
 </style>
 <script>
     function FirstAnswer() {
         let inp = document.getElementsByName('first_prob')[0];
-        try {
-            let p = parseFloat(inp.value);
-            let url = document.location.href;
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: data,
-                success: success,
-                dataType: dataType
-            });
-        } catch (e) {
-
+        let out = document.getElementById('for_answer1');
+        let failed = function () {
+            inp.className = 'wrong';
             alert('Incorrect value');
         }
-        fetch()
+        try {
+            let p = parseFloat(inp.value);
+            let data = {p: p, algo: 'one'};
+            $.ajax({
+                type: "POST",
+                url: document.location.href,
+                data: JSON.stringify(data),
+                success: function (resp) {
+                    if (resp.status === 200) {
+                        out.innerText = 'Answer is "' +
+                            ((resp.result === 0) ? "NO" : "YES") + '"';
+                        inp.className = '';
+                    } else {
+                        console.warn(resp.reason);
+                        failed();
+                    }
+                }
+            });
+        } catch (e) {
+            failed();
+        }
+    }
+
+    function SecondAnswer() {
+        let answers = [
+            'It is certain', 'It is decidedly so', 'Without a doubt', 'Yes — definitely',
+            'You may rely on it', 'As I see it, yes', 'Most likely', 'Outlook good',
+            'Signs point to yes', 'Yes', 'Reply hazy, try again', 'Ask again later',
+            'Better not tell you now', 'Cannot predict now', 'Concentrate and ask again',
+            'Don’t count on it', 'My reply is no', 'My sources say no', 'Outlook not so good',
+            'Very doubtful',
+        ]
+        let ps = [];
+        for (let i = 0; i < answers.length; i++) {
+            ps[i] = 1 / answers.length
+        }
+        let out = document.getElementById('for_answer2');
+        $.ajax({
+            type: "POST",
+            url: document.location.href,
+            data: JSON.stringify({p: ps, algo: 'two'}),
+            success: function (resp) {
+                if (resp.status === 200) {
+                    out.innerText = 'Answer is "' + answers[resp.result] + '"';
+                } else {
+                    console.error(resp.reason);
+                }
+            }
+        });
     }
 </script>
 <body>
 
 <div class="big frame">
-    <div class="frame">
-        Should I go to University today?
-    </div>
+    <label>
+        Ask your question here:
+        <input class="frame p-2 w-75" type="text"
+               placeholder="Should I go to University today?">
+    </label>
     <label>
         <i>Probability for "NO"</i>
         <input type="number" name="first_prob">
     </label><br/>
-    <input type="button" value="answer" onclick="FirstAnswer()">
+    <input type="button" value="Get answer" onclick="FirstAnswer()"
+           class="btn-info m-2 p-2 w-auto">
+    <p class="p-2 m-2" id="for_answer1">Answer is ...</p>
 </div>
+
+<div class="right big frame">
+    <label>
+        Ask your question here:
+        <input class="frame p-2 w-75" type="text"
+               placeholder="Should I go to University today?">
+    </label>
+    <input type="button" value="Get answer" onclick="SecondAnswer()"
+           class="btn-info m-2 p-2 w-auto">
+    <p class="p-2 m-2" id="for_answer2">Answer is ...</p>
+</div>
+
+<b><i>Вам не обязательно писать вопрос в поле, просто думайте об этом</i></b>
 
 </body>
 </html>
