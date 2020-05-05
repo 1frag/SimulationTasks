@@ -206,7 +206,10 @@ async def app_handler(request: aiohttp.web.Request):
         await asyncio.wait([safety_close(ws2server), safety_close(ws2client)])
     else:
         async with aiohttp.ClientSession() as client:
-            async with client.request(request.method, url) as resp:
+            async with client.request(request.method, url,
+                                      data=await request.read(),
+                                      params=request.query_string,
+                                      headers=request.headers) as resp:
                 logger.debug(f'{url=}')
                 return aiohttp.web.Response(
                     status=resp.status,
@@ -220,7 +223,7 @@ if __name__ == '__main__':
     app = aiohttp.web.Application()
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('.'))
     app.add_routes([
-        aiohttp.web.static('/common', 'common/static'),
+        aiohttp.web.static('/common/static', 'common/static'),
         aiohttp.web.post('/start', start_handler),
         aiohttp.web.post('/stop', stop_handler),
         aiohttp.web.get('/status', status_handler),

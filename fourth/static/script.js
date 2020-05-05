@@ -9,7 +9,7 @@ $(document).ready(function () {
         if (document.location.protocol === 'https:') {
             protocol += 's'
         }
-        conn = new WebSocket(protocol + '://' + document.location.host + "/ws");
+        conn = new WebSocket(protocol + '://' + document.location.host + "/fourth/ws");
         conn.onclose = function (_) {
             console.warn('Connection closed.');
         };
@@ -26,7 +26,7 @@ $(document).ready(function () {
             } else if (data['cmd'] === 'not_enough_money') {
                 alert('Вам не хватает денег чтобы купить акцию');
             } else if (data['cmd'] === 'not_enough_count') {
-                alert('Вы не можжете продать не имея ни одной акции');
+                alert('Вы не можете продать не имея ни одной акции');
             } else if (data['cmd'] === 'balance') {
                 $('#money')[0].innerText = 'Money: ' + data['money'].toFixed(2);
                 $('#count')[0].innerText = 'Count: ' + data['count'];

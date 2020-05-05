@@ -20,7 +20,7 @@ function StartExp(btn) {
         if (document.location.protocol === 'https:') {
             protocol += 's'
         }
-        conn = new WebSocket(protocol + '://' + document.location.host + "/ws");
+        conn = new WebSocket(protocol + '://' + document.location.host + "/second/ws");
         conn.onclose = function (_) {
             btn.disabled = false;
             console.warn('Connection closed.');

@@ -6,7 +6,7 @@ function Start(btn) {
         if (document.location.protocol === 'https:') {
             protocol += 's'
         }
-        conn = new WebSocket(protocol + '://' + document.location.host + "/ws");
+        conn = new WebSocket(protocol + '://' + document.location.host + "/seventh/ws");
         conn.onclose = function (_) {
             console.warn('Connection closed.');
         };
