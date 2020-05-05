@@ -10,7 +10,7 @@ import logging
 import traceback
 from typing import Dict, Tuple
 
-BASE_PORT = 8800
+BASE_PORT = os.getenv('PORT', 8800)
 logging.basicConfig(
     format='%(levelname)s: [%(filename)s at %(lineno)d] %(message)s',
     level=logging.DEBUG,
@@ -61,11 +61,12 @@ async def start(dirname, num):
     if hasattr(app_file, 'on_start'):
         app_file.on_start()  # noqa
     cur_app = aiohttp.web.Application()
-    cur_app.add_routes(app_file.handlers + ([  # noqa
-        aiohttp.web.static('/static', static_path),
-    ] if os.path.isdir(static_path) else []) + [
-        aiohttp.web.static('/common', 'common/static'),
-    ])
+    cur_app.add_routes(
+        app_file.handlers + (
+            [aiohttp.web.static('/static', static_path)]
+            if os.path.isdir(static_path) else []) + [
+            aiohttp.web.static('/common', 'common/static'),
+        ])
     aiohttp_jinja2.setup(cur_app, loader=jinja2.FileSystemLoader(templates_path))
     runner = aiohttp.web.AppRunner(cur_app)
     await runner.setup()
@@ -153,6 +154,68 @@ async def initial_startup(application):
     logger.info('Application started')
 
 
+async def app_handler(request: aiohttp.web.Request):
+    app_name = request.match_info['app_name']
+    path = request.match_info['path']  # type: str
+    for dirname in CURRENT_APPS.keys():
+        if dirname.split('/')[-1] == app_name:
+            app_name = dirname
+            break
+    else:
+        logger.debug(f'{app_name} not found in {list(CURRENT_APPS.keys())}')
+        raise aiohttp.web.HTTPNotFound()
+    port = CURRENT_APPS[app_name][1]._port  # noqa
+    url = f'http://localhost:{port}{path}'
+    if path.startswith('/ws'):
+        ws2client = aiohttp.web.WebSocketResponse()
+        await ws2client.prepare(request)
+        session = aiohttp.ClientSession()
+
+        async def wait_iterator():
+            queue = asyncio.Queue()
+
+            async def fetch_from(ws, alias):
+                while True:
+                    msg_ = await ws.receive()
+                    if msg_.type != aiohttp.web.WSMsgType.text:
+                        break
+                    await queue.put((alias, msg_))
+
+            clt = asyncio.ensure_future(fetch_from(ws2client, 'client'))
+            srv = asyncio.ensure_future(fetch_from(ws2server, 'server'))
+            while not (clt.done() or srv.done()):
+                yield await queue.get()
+
+        async with session.ws_connect(url) as ws2server:
+            async for direct, msg in wait_iterator():  # type: str, aiohttp.WSMessage
+                if msg.type == aiohttp.web.WSMsgType.text:
+                    if direct == 'client':
+                        await ws2server.send_str(msg.data)
+                    else:
+                        await ws2client.send_str(msg.data)
+                else:
+                    logger.debug(f'Websocket close with {msg.type=} {msg.data=} from {direct}')
+                    break
+
+        async def safety_close(ws):
+            try:
+                await ws.close()
+            except Exception:
+                pass
+
+        await asyncio.wait([safety_close(ws2server), safety_close(ws2client)])
+    else:
+        async with aiohttp.ClientSession() as client:
+            async with client.request(request.method, url) as resp:
+                logger.debug(f'{url=}')
+                return aiohttp.web.Response(
+                    status=resp.status,
+                    reason=resp.reason,
+                    body=await resp.read(),
+                    headers=resp.headers,
+                )
+
+
 if __name__ == '__main__':
     app = aiohttp.web.Application()
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('.'))
@@ -162,6 +225,7 @@ if __name__ == '__main__':
         aiohttp.web.post('/stop', stop_handler),
         aiohttp.web.get('/status', status_handler),
         aiohttp.web.post('/debug', debug_handler),
+        aiohttp.web.route('*', r'/{app_name:\w+}{path:.*}', app_handler),
     ])
     app.on_shutdown.append(graceful_shutdown)
     app.on_startup.append(initial_startup)

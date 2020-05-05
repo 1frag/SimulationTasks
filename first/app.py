@@ -162,7 +162,7 @@ def clean_up():
     global client_conf, cur_time, queue, ws
     if 'stop' in client_conf:
         client_conf['stop']()
-    queue = asyncio.Queue(maxsize=100)
+    queue = asyncio.Queue()
     client_conf = {}
     cur_time = None
     ws = None
@@ -174,11 +174,13 @@ async def main_handler(request):
 
 
 async def websocket_handler(request: aiohttp.web.Request):
+    logger.debug('here1')
     global ws, client_conf, cur_time
     clean_up()
     cur_time = DEFAULT_TIME
     ws = aiohttp.web.WebSocketResponse()
     await ws.prepare(request)
+    logger.debug('here2')
     settings = deepcopy(DEFAULT_SETTINGS)
     field = [
         [Item() for _ in range(4)]
@@ -264,7 +266,7 @@ HISTORY = []  # результаты прошлых игр
 
 cur_time = DEFAULT_TIME
 client_conf = {}
-queue = asyncio.Queue(maxsize=100)
+queue = asyncio.Queue()
 ws: Optional[aiohttp.web_ws.WebSocketResponse] = None
 
 DEFAULT_BUDGET = 100

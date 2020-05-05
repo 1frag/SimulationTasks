@@ -7,7 +7,7 @@ function StartGame(btn) {
         if (document.location.protocol === 'https:') {
             protocol += 's'
         }
-        conn = new WebSocket(protocol + '://' + document.location.host + "/ws");
+        conn = new WebSocket(protocol + '://' + document.location.host + "/first/ws");
         conn.onclose = function (_) {
             btn.innerText = 'START!';
             console.warn('Connection closed.');

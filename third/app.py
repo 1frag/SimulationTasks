@@ -91,7 +91,7 @@ async def main_handler(request):
 
 
 async def websocket_handler(request: aiohttp.web.Request):
-    queue = asyncio.Queue(maxsize=100)
+    queue = asyncio.Queue()
     ws = aiohttp.web.WebSocketResponse()
     await ws.prepare(request)
     conf = Conf()
