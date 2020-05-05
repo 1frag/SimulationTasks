@@ -1,1 +1,1 @@
-web: python run_apps.py all one-app
+web: python run_apps.py all
