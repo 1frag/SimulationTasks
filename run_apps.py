@@ -10,14 +10,13 @@ import logging
 import traceback
 from typing import Dict, Tuple
 
-BASE_PORT = os.getenv('PORT', 8800)
+BASE_PORT = int(os.getenv('PORT', 8800))
 logging.basicConfig(
     format='%(levelname)s: [%(filename)s at %(lineno)d] %(message)s',
     level=logging.DEBUG,
 )
 CURRENT_APPS = dict()  # type: Dict[str, Tuple[aiohttp.web.AppRunner, aiohttp.web.TCPSite]]
 loop = asyncio.get_event_loop()
-PUBLIC_APP = 8  # Only one app can be public
 
 
 def pull_from_target(target):
@@ -50,8 +49,6 @@ def trust_key_required(func):
 
 
 async def start(dirname, num):
-    if num == PUBLIC_APP and os.getenv('PORT'):
-        num = int(os.getenv('PORT')) - BASE_PORT
     app_name = os.path.join(dirname, 'app.py')
     static_path = os.path.join(dirname, 'static')
     templates_path = os.path.join(dirname, 'templates')
