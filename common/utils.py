@@ -1,5 +1,7 @@
 import aiohttp.web
 import os
+import random
+from typing import List
 
 
 def trust_key_required(func):
@@ -13,3 +15,12 @@ def trust_key_required(func):
         return func(request)
 
     return inner
+
+
+def choose(p: List['float']):
+    a = random.random()
+    for k, pk in enumerate(p):
+        a -= pk
+        if a < 0:
+            return k
+    return len(p) - 1

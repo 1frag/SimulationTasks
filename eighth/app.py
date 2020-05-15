@@ -4,17 +4,10 @@ import random
 import json
 from typing import List
 import logging
+from common.utils import choose
 
 
 async def main_handler(request: aiohttp.web.Request):
-    def choose(p: List['float']):
-        a = random.random()
-        for k, pk in enumerate(p):
-            a -= pk
-            if a < 0:
-                return k
-        return len(p) - 1
-
     if request.method == 'GET':
         return aiohttp_jinja2.render_template('index.html', request, {})
     else:
