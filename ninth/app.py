@@ -4,10 +4,8 @@ import logging
 import os
 from typing import List
 import random
-import matplotlib.pyplot as plt
-import uuid
 
-from common.utils import trust_key_required
+from common.utils import draw_gist_by_stats, save_and_clear
 
 
 async def main_handler(request: aiohttp.web.Request):
@@ -39,26 +37,11 @@ async def main_handler(request: aiohttp.web.Request):
             statistics = {i: 0 for i in range(len(p))}
             if n > 1e7:
                 raise ValueError('N too long')
-            if len(os.listdir(dir_saved)) > 63:
-                class Stub:
-                    headers = {'Authorization': os.getenv('TRUST_KEY')}
-
-                await removing(Stub())
             for _ in range(n):
                 statistics[choose(p)] += 1
-            rects = plt.bar(*zip(*statistics.items()))
-            plt.title(f'N={n}, probs={p}')
-            for rect in rects:
-                # more: https://matplotlib.org/3.1.3/gallery/lines_bars_and_markers/barchart.html
-                height = rect.get_height()
-                plt.annotate('{}'.format(round(height / n, 3)),
-                             xy=(rect.get_x() + rect.get_width() / 2, height),
-                             xytext=(0, 3),  # 3 points vertical offset
-                             textcoords="offset points",
-                             ha='center', va='bottom')
-            path = os.path.join(dir_saved, str(uuid.uuid4().hex)) + '.png'
-            plt.savefig(path)
-            plt.clf()
+            draw_gist_by_stats(statistics, n, p)
+            path = save_and_clear(dir_saved)
+
             return aiohttp.web.json_response({
                 'status': 200,
                 'src': path,
@@ -70,23 +53,9 @@ async def main_handler(request: aiohttp.web.Request):
             })
 
 
-@trust_key_required
-async def removing(request):
-    ret_val = dict(removed=0)
-    for name in os.listdir(dir_saved):
-        if not name.startswith('protected_'):
-            path = os.path.join(dir_saved, name)
-            os.remove(path)
-            ret_val['removed'] += 1
-    if ret_val['removed']:
-        logger.warning(f'{ret_val["removed"]} files have been deleted')
-    return aiohttp.web.json_response(ret_val)
-
-
 handlers = [
     aiohttp.web.route('*', '/', main_handler),
     aiohttp.web.static('/saved', 'ninth/saved'),
-    aiohttp.web.post('/rm', removing),
 ]
 dir_saved = os.path.join(os.curdir, 'ninth', 'saved')
 logger = logging.getLogger(__name__)

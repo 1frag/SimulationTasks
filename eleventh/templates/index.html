@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>10th lab</title>
+</head>
+<link rel="stylesheet" href="/common/static/bootstrap.min.css">
+<body>
+
+{% if not n %}
+    <p>Введите количество различных событий</p>
+    <form>
+        <label>
+            <input type="number" name="n" min="1" max="100">
+            <input type="submit">
+        </label>
+    </form>
+{% else %}
+    {% if not ps %}
+        <p>Введите ряд распредения</p>
+        <form>
+            <input type="hidden" name="n" value="{{ n }}">
+            {% for i in range(n - 1) %}
+                <label><input type="number" name="p" step="0.001"
+                              min="0" max="1"></label><br/>
+            {% endfor %}
+            <label><input type="number" disabled placeholder="auto"></label><br/>
+            <input type="submit">
+        </form>
+    {% else %}
+        <p>Сколько событий генерируем?</p>
+        <form>
+            <input type="hidden" name="n" value="{{ n }}">
+            {% for p in ps %}
+                <input type="hidden" name="p" value="{{ p }}">
+            {% endfor %}
+            <label>
+                <input type="number" name="N" min="1" max="1000000">
+                <input type="submit">
+            </label>
+        </form>
+    {% endif %}
+{% endif %}
+
+</body>
+</html>

@@ -1,7 +1,12 @@
 import aiohttp.web
+import matplotlib.pyplot as plt
 import os
 import random
+import uuid
+
 from typing import List
+
+LIMIT_SAVED_FILES = 64
 
 
 def trust_key_required(func):
@@ -24,3 +29,33 @@ def choose(p: List['float']):
         if a < 0:
             return k
     return len(p) - 1
+
+
+def draw_gist_by_stats(stats, n, p):
+    # more: https://matplotlib.org/3.1.3/gallery/lines_bars_and_markers/barchart.html
+    rects = plt.bar(*zip(*stats.items()))
+    plt.title(f'N={n}, probs={p}')
+    for rect in rects:
+        height = rect.get_height()
+        plt.annotate(str(round(height / n, 3)),
+                     xy=(rect.get_x() + rect.get_width() / 2, height),
+                     xytext=(0, 3),  # 3 points vertical offset
+                     textcoords="offset points",
+                     ha='center', va='bottom')
+
+
+def save_and_clear(dir_saved):
+    path = os.path.join(dir_saved, str(uuid.uuid4().hex)) + '.png'
+    plt.savefig(path)
+    plt.clf()
+    clear_directory(dir_saved)
+    return path
+
+
+def clear_directory(dir_saved):
+    if len(os.listdir(dir_saved)) <= LIMIT_SAVED_FILES:
+        return
+    for name in os.listdir(dir_saved):
+        if not name.startswith('p_'):  # protected
+            path = os.path.join(dir_saved, name)
+            os.remove(path)
