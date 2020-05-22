@@ -5,3 +5,4 @@ asyncio~=3.4.3
 num2words~=0.5.10
 matplotlib~=3.2.1
 scipy~=1.4.1
+contextvars~=2.4

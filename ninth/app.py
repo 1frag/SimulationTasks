@@ -39,7 +39,7 @@ async def main_handler(request: aiohttp.web.Request):
                 raise ValueError('N too long')
             for _ in range(n):
                 statistics[choose(p)] += 1
-            draw_gist_by_stats(statistics, n, p)
+            draw_gist_by_stats(statistics, f'N={n}, probs={p}', n)
             path = save_and_clear(dir_saved)
 
             return aiohttp.web.json_response({

@@ -4,7 +4,7 @@ import os
 import random
 import uuid
 
-from typing import List
+from typing import List, Union, Dict
 
 LIMIT_SAVED_FILES = 64
 
@@ -31,13 +31,13 @@ def choose(p: List['float']):
     return len(p) - 1
 
 
-def draw_gist_by_stats(stats, n, p):
+def draw_gist_by_stats(stats, title, n, need_annotate=True):
     # more: https://matplotlib.org/3.1.3/gallery/lines_bars_and_markers/barchart.html
     rects = plt.bar(*zip(*stats.items()))
-    plt.title(f'N={n}, probs={p}')
+    plt.title(title)
     for rect in rects:
         height = rect.get_height()
-        plt.annotate(str(round(height / n, 3)),
+        plt.annotate(str(round(height / n, 3)) if need_annotate else '',
                      xy=(rect.get_x() + rect.get_width() / 2, height),
                      xytext=(0, 3),  # 3 points vertical offset
                      textcoords="offset points",
@@ -59,3 +59,11 @@ def clear_directory(dir_saved):
         if not name.startswith('p_'):  # protected
             path = os.path.join(dir_saved, name)
             os.remove(path)
+
+
+def calculate_stats(p: Union[Dict, List], m: int):
+    if isinstance(p, list):
+        p = dict(enumerate(p))
+    average = sum(map(lambda i: p.get(i, 0) * i, range(m)))
+    variance = sum(map(lambda i: p.get(i, 0) * (i ** 2), range(m))) - (average ** 2)
+    return round(average, 4), round(variance, 4)

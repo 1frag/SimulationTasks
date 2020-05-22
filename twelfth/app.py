@@ -3,7 +3,6 @@ import random
 import logging
 import math
 import aiohttp_jinja2
-from common.utils import choose
 
 
 def generate_score(intensity):
