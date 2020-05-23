@@ -6,3 +6,7 @@ num2words~=0.5.10
 matplotlib~=3.2.1
 scipy~=1.4.1
 contextvars~=2.4
+pip~=20.1
+wheel~=0.34.2
+setuptools~=41.2.0
+seaborn~=0.10.1

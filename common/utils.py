@@ -2,6 +2,7 @@ import aiohttp.web
 import matplotlib.pyplot as plt
 import os
 import random
+import seaborn as sns
 import uuid
 
 from typing import List, Union, Dict
@@ -33,7 +34,9 @@ def choose(p: List['float']):
 
 def draw_gist_by_stats(stats, title, n, need_annotate=True):
     # more: https://matplotlib.org/3.1.3/gallery/lines_bars_and_markers/barchart.html
-    rects = plt.bar(*zip(*stats.items()))
+    sort_stats = sorted(stats.items(), key=lambda x: x[0])
+    width = min([sort_stats[i + 1][0] - sort_stats[i][0] for i in range(len(sort_stats)-1)])
+    rects = plt.bar(*zip(*stats.items()), width=0.8 * width)
     plt.title(title)
     for rect in rects:
         height = rect.get_height()

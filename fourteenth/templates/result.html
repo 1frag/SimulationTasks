@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>14th lab</title>
+    <link rel="stylesheet" href="/common/static/bootstrap.min.css">
+    <script src="/common/static/slim.min.js"></script>
+    <script src="/common/static/popper.min.js"></script>
+    <script src="/common/static/bootstrap.min.js"></script>
+    <script src="/common/static/jquery.min.js"></script>
+</head>
+<style>
+    body {
+        background-color: wheat;
+    }
+
+    .alimg {
+        max-height: 500px;
+        margin-left: 70px;
+    }
+</style>
+<body>
+
+<table width="100%">
+    <tr>
+        <td>
+            <h3>Метод суммирования:</h3>
+            <img src="/fourteenth/saved/{{ s0 }}" alt="current result">
+        </td>
+        <td>
+            <h3>Более точная формула суммирования:</h3>
+            <img src="/fourteenth/saved/{{ s1 }}" alt="current result">
+        </td>
+        <td>
+            <h3>Метод Бокса-Мюллера (cos):</h3>
+            <img src="/fourteenth/saved/{{ s2 }}" alt="current result">
+        </td>
+
+    </tr>
+    <tr>
+        <td>
+            <h3>Метод Бокса-Мюллера (sin):</h3>
+            <img src="/fourteenth/saved/{{ s3 }}" alt="current result">
+        </td>
+        <td>
+            <button onclick="document.location.href='/fourteenth'">
+                На главную</button>
+            <button onclick="document.location.reload()">
+                Сгенерировать поновой</button>
+            <p>Вывод: с увеличением N погрешность в мат.
+                ожидании и дисперсии уменьшается.</p>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
