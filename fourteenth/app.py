@@ -10,7 +10,7 @@ from typing import List
 
 from scipy.stats import chi2
 
-from common.utils import draw_gist_by_stats, save_and_clear
+from common.utils import draw_gist_by_stats, save_and_clear, on_error
 
 
 def calc_chi2(e, v, n, stats: List[float]):
@@ -58,29 +58,13 @@ def choices(k, e, v, N):
     return ret_val, time.time() - start_at
 
 
-def on_error(exc):
-    def wrapper(func):
-        async def inner(req):
-            try:
-                return await func(req)
-            except aiohttp.web.HTTPException:
-                raise
-            except Exception as e:
-                logger.warning(e)
-                raise exc()
-
-        return inner
-
-    return wrapper
-
-
 def calculate_stats(stats, n):
     ex = sum(stats) / n
     dx = (sum(i * i for i in stats) / n) - (ex * ex)
     return ex, dx
 
 
-# @on_error(aiohttp.web.HTTPBadRequest)
+@on_error(aiohttp.web.HTTPBadRequest)
 async def main_handler(request: aiohttp.web.Request):
     e = float(request.query.getone('e', 0))  # mean
     v = float(request.query.getone('v', 0))  # variance

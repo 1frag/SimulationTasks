@@ -10,7 +10,10 @@ from contextvars import ContextVar
 from collections import Counter
 from scipy.stats import chi2
 
-from common.utils import draw_gist_by_stats, save_and_clear, calculate_stats
+from common.utils import (
+    draw_gist_by_stats, save_and_clear, calculate_stats,
+    on_error,
+)
 
 
 def choices(n):
@@ -42,20 +45,6 @@ def theoretical_inp():
         sum_ += pi
         prps.append(pi)
     return prps, len(prps)
-
-
-def on_error(exc):
-    def wrapper(func):
-        async def inner(req):
-            try:
-                return await func(req)
-            except aiohttp.web.HTTPException:
-                raise
-            except Exception as e:
-                logger.warning(e)
-                raise exc()
-        return inner
-    return wrapper
 
 
 @on_error(aiohttp.web.HTTPBadRequest)

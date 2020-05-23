@@ -7,7 +7,10 @@ import os
 from collections import Counter
 from scipy.stats import chi2
 
-from common.utils import choose, draw_gist_by_stats, save_and_clear, calculate_stats
+from common.utils import (
+    choose, draw_gist_by_stats, save_and_clear,
+    calculate_stats, on_error,
+)
 from tenth.app import main_handler as helper  # we use previous start-page
 
 
@@ -15,20 +18,6 @@ def choices(p, n, m):
     ret_val = {i: 0 for i in range(m)}
     ret_val.update(Counter([choose(p) for _ in range(n)]))
     return ret_val
-
-
-def on_error(exc):
-    def wrapper(func):
-        async def inner(req):
-            try:
-                return await func(req)
-            except aiohttp.web.HTTPException:
-                raise
-            except Exception as e:
-                logger.warning(e)
-                raise exc()
-        return inner
-    return wrapper
 
 
 @on_error(aiohttp.web.HTTPBadRequest)

@@ -70,3 +70,19 @@ def calculate_stats(p: Union[Dict, List], m: int):
     average = sum(map(lambda i: p.get(i, 0) * i, range(m)))
     variance = sum(map(lambda i: p.get(i, 0) * (i ** 2), range(m))) - (average ** 2)
     return round(average, 4), round(variance, 4)
+
+
+def on_error(exc):
+    def wrapper(func):
+        async def inner(req):
+            try:
+                return await func(req)
+            except aiohttp.web.HTTPException:
+                raise
+            except Exception as e:
+                logger.warning(e)
+                raise exc()
+
+        return inner
+
+    return wrapper
