@@ -18,12 +18,11 @@ logging.basicConfig(
     level=logging.DEBUG,
 )
 CURRENT_APPS = dict()  # type: Dict[str, Tuple[aiohttp.web.AppRunner, aiohttp.web.TCPSite]]
-loop = asyncio.get_event_loop()
+cur_path = os.getcwd()
 
 
 def pull_from_target(target):
     names = {num2words(i, ordinal=True): i for i in range(1, 1000)}
-    cur_path = os.getcwd()
     for dirname in os.listdir():
         path = os.path.join(cur_path, dirname)
         if os.path.isdir(path) and (dirname in names):
@@ -39,8 +38,13 @@ def all_directories_with_templates():
 
 async def start(dirname, num):
     app_name = os.path.join(dirname, 'app.py')
-    static_path = os.path.join(dirname, 'static')
-    templates_path = os.path.join(dirname, 'templates')
+    if num == 16:
+        o_dirname = os.path.join(cur_path, 'fourth')
+    else:
+        o_dirname = dirname
+
+    static_path = os.path.join(o_dirname, 'static')
+    templates_path = os.path.join(o_dirname, 'templates')
     spec = importlib.util.spec_from_file_location(app_name, app_name)
     app_file = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(app_file)

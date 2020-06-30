@@ -9,7 +9,8 @@ $(document).ready(function () {
         if (document.location.protocol === 'https:') {
             protocol += 's'
         }
-        conn = new WebSocket(protocol + '://' + document.location.host + "/fourth/ws");
+        conn = new WebSocket(protocol + '://' + document.location.host + "/"
+        + current +"/ws");
         conn.onclose = function (_) {
             console.warn('Connection closed.');
         };

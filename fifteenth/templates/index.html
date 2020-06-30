@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>15th lab</title>
+</head>
+<link rel="stylesheet" href="/common/static/bootstrap.min.css">
+<script src="/common/static/jquery.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script>
+<script src="https://code.highcharts.com/modules/accessibility.js"></script>
+<script>
+    if (window["WebSocket"]) {
+        let protocol = 'ws';
+        if (document.location.protocol === 'https:') {
+            protocol += 's'
+        }
+        conn = new WebSocket(protocol + '://' + document.location.host + "/fifteenth/ws");
+        conn.onclose = function (_) {
+            console.warn('Connection closed.');
+        };
+        conn.onmessage = function (evt) {
+            let data = JSON.parse(evt.data);
+            $('#now_state')[0].innerText = 'Сейчас ' + data['state'];
+            drawChart(data['all_states'], data['series']);
+            console.log(data['for_table']);
+            updateTable(data['for_table']);
+        };
+        conn.onopen = function (__) {
+
+        };
+        conn.onerror = function (error) {
+            console.error(error.message);
+        };
+    } else {
+        console.info('Your browser does not support WebSockets.');
+    }
+
+    function drawChart(all_states, series) {
+        Highcharts.chart('container', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Статистика'
+            },
+            xAxis: {
+                categories: all_states,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Вероятность'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.4f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: series,
+        });
+    }
+
+    function updateTable(ft) {
+        [0, 1].forEach(i => {
+            [0, 1, 2].forEach(j => {
+                $('#t' + j + i)[0].innerText = ft[i][j];
+            });
+        });
+    }
+</script>
+<body>
+<h2 id="now_state">Сейчас </h2>
+<table class="table">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Состояние</th>
+        <th scope="col">Частота</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <th scope="row">1</th>
+        <td id="t00"></td>
+        <td id="t01"></td>
+    </tr>
+    <tr>
+        <th scope="row">2</th>
+        <td id="t10"></td>
+        <td id="t11"></td>
+    </tr>
+    <tr>
+        <th scope="row">3</th>
+        <td id="t20"></td>
+        <td id="t21"></td>
+    </tr>
+    </tbody>
+</table>
+<figure class="highcharts-figure">
+    <div id="container"></div>
+    <p class="highcharts-description"></p>
+</figure>
+</body>
+</html>

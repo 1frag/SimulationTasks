@@ -78,7 +78,7 @@ async def reader(ws, queue, conf):
 
 @aiohttp_jinja2.template('index.html')
 async def main_handler(request):
-    return request.__dict__
+    return {'current': custom_data['current']}
 
 
 async def websocket_handler(request: aiohttp.web.Request):
@@ -143,7 +143,7 @@ async def update_currency():
     def get_next(c, t=None):
         return {
             'x': time.time() * 1000 + (t * 1000 if t else 0),
-            'y': c * (1 + K * (random.random() - 0.5))
+            'y': custom_data['get_y'](c, t),
         }
 
     global DATA
@@ -164,6 +164,11 @@ def on_start():
     asyncio.ensure_future(Conf.top_changer())
 
 
+def get_y(c, t):
+    print('using 4th lab')
+    return c * (1 + K * (random.random() - 0.5))
+
+
 handlers = [
     aiohttp.web.get('/', main_handler),
     aiohttp.web.get('/ws', websocket_handler),
@@ -178,4 +183,5 @@ currency_changed = {
 DEFAULT_MONEY = 5000
 DEFAULT_COUNT = 0
 names = set()
-
+custom_data = {'get_y': get_y,
+               'current': 'fourth'}
