@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>17</title>
+    <script src="/common/static/jquery.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="/common/static/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+    {% if nothing %}
+        <form>
+            <label for="N">Количество испытаний</label>
+            <input class="form-control" type="number" id="N" name="n" min="1" value="100">
+
+            <label for="T">Время одного испытания (с)</label>
+            <input class="form-control" type="number" id="T" name="t" min="10" value="30">
+
+            <label for="l1">Интенсивность первого потока</label>
+            <input type="number" value="0.3" name="l1" id="l1" class="form-control">
+
+            <label for="l2">Интенсивность второго потока</label>
+            <input type="number" value="0.4" name="l2" id="l2" class="form-control">
+
+            <input type="submit" formmethod="post" value="Submit" class="btn btn-info m-4">
+        </form>
+    {% else %}
+        Медиана эмпирическая: {{ average['emp'] }}<br/>
+        Медиана теоретическая: {{ average['teor'] }}<br/>
+        Ошибка в медиане: {{ average['error'] }}<br/>
+
+        Дисперсия эмпирическая: {{ variance['emp'] }}<br/>
+        Дисперсия теоретическая: {{ variance['teor'] }}<br/>
+        Ошибка в дисперсии: {{ variance['error'] }}<br/>
+
+        Чи-квадрат: {{ chi2['emp'] }}<br/>
+        Критическое значение: {{ chi2['teor'] }}<br/>
+        {% if chi2['passed'] %}
+            Пройдено
+        {% else %}
+            Не пройдено
+        {% endif %}
+    {% endif %}
+</div>
+
+</body>
+</html>
